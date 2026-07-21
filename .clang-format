@@ -1,0 +1,39 @@
+BasedOnStyle: Google
+
+# Basic layout
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+ColumnLimit: 0
+
+# Preprocessor handling (important for STM32 HAL)
+IndentPPDirectives: AfterHash
+
+# Class / struct formatting (useful for mixed C/C++ STM32 projects)
+AccessModifierOffset: 0
+
+# Alignment improvements for embedded readability
+AlignConsecutiveMacros: true
+AlignConsecutiveDeclarations: true
+AlignConsecutiveAssignments: true
+
+# Pointer behavior (important for HAL APIs like uint8_t *buf)
+PointerAlignment: Left
+
+# Brace style (clean embedded readability)
+BreakBeforeBraces: Attach
+
+# Control statement formatting
+SpaceBeforeParens: ControlStatements
+
+# Keep macros like register maps readable
+MacroBlockBegin: "^#if 0"
+MacroBlockEnd: "^#endif"
+
+# Better readability for dense embedded code
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: None
+
+# Preserves STM32 HAL style spacing consistency
+SpaceAfterCStyleCast: true
