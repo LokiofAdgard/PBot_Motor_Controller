@@ -19,9 +19,6 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 
-#include <stdint.h>
-
-
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -115,6 +112,7 @@ int main(void) {
     HAL_TIM_Base_Start_IT(&htim2);
     HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
     mc_init(&mc, &htim1);
+    can_init(&hcan);
     // mc.motor_l.en_uns = -500;
 
     /* USER CODE END 2 */
@@ -191,11 +189,11 @@ static void MX_CAN_Init(void) {
 
     /* USER CODE END CAN_Init 1 */
     hcan.Instance                  = CAN1;
-    hcan.Init.Prescaler            = 16;
+    hcan.Init.Prescaler            = 2;
     hcan.Init.Mode                 = CAN_MODE_NORMAL;
     hcan.Init.SyncJumpWidth        = CAN_SJW_1TQ;
-    hcan.Init.TimeSeg1             = CAN_BS1_1TQ;
-    hcan.Init.TimeSeg2             = CAN_BS2_1TQ;
+    hcan.Init.TimeSeg1             = CAN_BS1_13TQ;
+    hcan.Init.TimeSeg2             = CAN_BS2_2TQ;
     hcan.Init.TimeTriggeredMode    = DISABLE;
     hcan.Init.AutoBusOff           = DISABLE;
     hcan.Init.AutoWakeUp           = DISABLE;
@@ -422,8 +420,8 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef* hcan) {
         //     }
         //     break;
         case CMD_VEL:
-            mc.motor_l.en_uns = (int16_t) (RxData[0]);
-            mc.motor_r.en_uns = (int16_t) (RxData[1]);
+            mc.motor_l.en_uns = (int16_t) (((uint16_t) RxData[1] << 8) | RxData[0]);
+            mc.motor_r.en_uns = (int16_t) (((uint16_t) RxData[3] << 8) | RxData[2]);
             break;
     }
 }
