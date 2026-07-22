@@ -19,8 +19,14 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 
+#include <stdint.h>
+
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+
+#include "canbus.h"
+#include "structs.h"
 
 /* USER CODE END Includes */
 
@@ -53,6 +59,8 @@ volatile uint8_t count_100ms = 0;
 volatile uint8_t count_1s    = 0;
 volatile uint8_t flag_reg    = 0x00;
 uint16_t         count       = 0;
+
+MotorController mc;
 
 /* USER CODE END PV */
 
@@ -106,6 +114,8 @@ int main(void) {
     /* USER CODE BEGIN 2 */
     HAL_TIM_Base_Start_IT(&htim2);
     HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+    mc_init(&mc, &htim1);
+    // mc.motor_l.en_uns = -500;
 
     /* USER CODE END 2 */
 
@@ -114,6 +124,8 @@ int main(void) {
     while (1) {
         if (flag_reg & (1 << 0)) {  // per 10 ms
             flag_reg &= ~(1 << 0);
+
+            mc_set_motors(&mc);
         }
         if (flag_reg & (1 << 1)) {  // per 100ms
             flag_reg &= ~(1 << 1);
@@ -122,6 +134,7 @@ int main(void) {
             flag_reg &= ~(1 << 2);
             HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
             // HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_8);
+            // mc.motor_l.en_uns += 10;
 
             count += 10;
         }
@@ -378,6 +391,40 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim) {
                 flag_reg |= 1 << 2;
             }
         }
+    }
+}
+
+void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef* hcan) {
+    HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO1, &RxHeader, RxData);
+
+    switch (RxHeader.StdId) {
+        case DATA_REQ:
+            switch (RxData[0]) {
+                case GET_STAT:
+                    mc.state.bits.req_stat = 1;
+                    break;
+                case GET_ENC:
+                    mc.state.bits.req_enc = 1;
+                    break;
+                case GET_ALL:
+                    mc.state.bits.req_all = 1;
+                    break;
+            }
+            break;
+        // case SET_MODE:
+        //     switch (RxData[0]) {
+        //         case SET_PWR_ON:
+        //             // pc.state.bits.mode = MODE_PWR_ON;
+        //             break;
+        //         case SET_PWR_SAV:
+        //             // pc.state.bits.mode = MODE_PWR_SAV;
+        //             break;
+        //     }
+        //     break;
+        case CMD_VEL:
+            mc.motor_l.en_uns = (int16_t) (RxData[0]);
+            mc.motor_r.en_uns = (int16_t) (RxData[1]);
+            break;
     }
 }
 
