@@ -111,9 +111,10 @@ int main(void) {
     /* USER CODE BEGIN 2 */
     HAL_TIM_Base_Start_IT(&htim2);
     HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
-    mc_init(&mc, &htim1);
+    HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
+    mc_init(&mc, &htim1, &hi2c1);
     can_init(&hcan);
-    // mc.motor_l.en_uns = -500;
+    // mc.motor_l.en_uns = -100;
 
     /* USER CODE END 2 */
 
@@ -123,6 +124,8 @@ int main(void) {
         if (flag_reg & (1 << 0)) {  // per 10 ms
             flag_reg &= ~(1 << 0);
 
+            // mc.state.bits.req_all = 1;
+            mc_reply(&mc);
             mc_set_motors(&mc);
         }
         if (flag_reg & (1 << 1)) {  // per 100ms
@@ -132,8 +135,9 @@ int main(void) {
             flag_reg &= ~(1 << 2);
             HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
             // HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_8);
-            // mc.motor_l.en_uns += 10;
+            // mc.motor_l.en_uns += 5;
 
+            mc_update(&mc);
             count += 10;
         }
         /* USER CODE END WHILE */
@@ -279,13 +283,19 @@ static void MX_TIM1_Init(void) {
         Error_Handler();
     }
     sConfigOC.OCMode       = TIM_OCMODE_PWM1;
-    sConfigOC.Pulse        = 200;
+    sConfigOC.Pulse        = 0;
     sConfigOC.OCPolarity   = TIM_OCPOLARITY_HIGH;
     sConfigOC.OCNPolarity  = TIM_OCNPOLARITY_HIGH;
     sConfigOC.OCFastMode   = TIM_OCFAST_DISABLE;
     sConfigOC.OCIdleState  = TIM_OCIDLESTATE_RESET;
     sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
     if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_1) != HAL_OK) {
+        Error_Handler();
+    }
+    if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_2) != HAL_OK) {
+        Error_Handler();
+    }
+    if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_3) != HAL_OK) {
         Error_Handler();
     }
     sBreakDeadTimeConfig.OffStateRunMode  = TIM_OSSR_DISABLE;

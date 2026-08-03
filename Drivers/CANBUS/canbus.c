@@ -4,6 +4,7 @@
 
 #include "stm32f1xx_hal_can.h"
 #include "stm32f1xx_hal_def.h"
+// #include "structs.h"
 
 uint16_t            readValue;
 CAN_TxHeaderTypeDef TxHeader;
@@ -44,37 +45,26 @@ void can_init(CAN_HandleTypeDef* hcan) {
 
 HAL_StatusTypeDef can_transmit(uint32_t txID) {
     TxHeader.StdId = txID;
-    // switch (txID) {
-        // case CAN_ID_INA:
-        //     TxHeader.DLC = 7;
-        //     break;
-        // case CAN_ID_STA:
-        //     TxHeader.DLC = 8;
-        //     break;
-        // default:
-        //     TxHeader.DLC = 8;
-        //     break;
-    // }
+    switch (txID) {
+        case CAN_ID_STA:
+            TxHeader.DLC = 4;
+            break;
+        case CAN_ID_ENC:
+            TxHeader.DLC = 8;
+            break;
+        default:
+            TxHeader.DLC = 8;
+            break;
+    }
 
     HAL_StatusTypeDef status = HAL_CAN_AddTxMessage(&hcan, &TxHeader, TxData, &TxMailbox);
     return status;
 }
 
-// HAL_StatusTypeDef can_transmit_ina(INA231_t* ina) {
-//     TxData[0] = (ina->v_reg >> 0) & 0xFF;
-//     TxData[1] = (ina->v_reg >> 8) & 0xFF;
-//     TxData[2] = (ina->i_reg >> 0) & 0xFF;
-//     TxData[3] = (ina->i_reg >> 8) & 0xFF;
-//     TxData[4] = (ina->p_reg >> 0) & 0xFF;
-//     TxData[5] = (ina->p_reg >> 8) & 0xFF;
-//     TxData[6] = ina->address;
-//     return can_transmit(CAN_ID_INA);
-// }
-
-// HAL_StatusTypeDef can_transmit_sta(PowerController* pc) {
-//     TxData[0] = (pc->state.raw >> 0) & 0xFF;
-//     TxData[1] = (pc->state.raw >> 8) & 0xFF;
-//     TxData[2] = (pc->tmp.t_reg >> 0) & 0xFF;
-//     TxData[3] = (pc->tmp.t_reg >> 8) & 0xFF;
-//     return can_transmit(CAN_ID_STA);
-// }
+HAL_StatusTypeDef can_transmit_sta(MotorController* mc) {
+    TxData[0] = (mc->state.raw >> 0) & 0xFF;
+    TxData[1] = (mc->state.raw >> 8) & 0xFF;
+    TxData[2] = (mc->tmp.t_reg >> 0) & 0xFF;
+    TxData[3] = (mc->tmp.t_reg >> 8) & 0xFF;
+    return can_transmit(CAN_ID_STA);
+}

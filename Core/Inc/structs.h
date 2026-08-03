@@ -9,6 +9,8 @@
 #define EN_DEAD_ZONE 10
 #define EN_MAX_ZONE  400
 
+#define TMP_ADDR (0x48 << 1)
+
 typedef struct Motor_t {
     int16_t  en_uns;
     uint16_t en_a;
@@ -38,7 +40,9 @@ typedef struct MotorController {
     TMP102_t tmp;
 } MotorController;
 
-void mc_init(MotorController* mc, TIM_HandleTypeDef* tim);
+void mc_init(MotorController* mc, TIM_HandleTypeDef* tim, I2C_HandleTypeDef* hi2c);
+void mc_update(MotorController* mc);
 void mc_set_motors(MotorController* mc);
+void mc_reply(MotorController* mc);
 
 #endif

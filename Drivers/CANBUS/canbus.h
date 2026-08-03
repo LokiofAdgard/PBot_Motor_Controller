@@ -6,7 +6,7 @@
 #include "stm32f1xx_hal.h"
 #include "stm32f1xx_hal_can.h"
 #include "stm32f1xx_hal_def.h"
-// #include "structs.h"
+#include "structs.h"
 
 typedef enum {
     CAN_ID_STA = 0x300,
@@ -35,5 +35,7 @@ extern uint8_t             RxData[8];
 
 void              can_init(CAN_HandleTypeDef* hcan);
 HAL_StatusTypeDef can_transmit(uint32_t txID);
+HAL_StatusTypeDef can_transmit_sta(MotorController* mc);
+// HAL_StatusTypeDef can_transmit_enc(MotorController* mc);
 
 #endif
