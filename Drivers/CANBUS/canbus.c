@@ -57,6 +57,8 @@ HAL_StatusTypeDef can_transmit(uint32_t txID) {
             break;
     }
 
+    if (HAL_CAN_GetTxMailboxesFreeLevel(&hcan) == 0)
+        HAL_Delay(1);
     HAL_StatusTypeDef status = HAL_CAN_AddTxMessage(&hcan, &TxHeader, TxData, &TxMailbox);
     return status;
 }

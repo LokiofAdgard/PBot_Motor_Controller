@@ -18,8 +18,8 @@ void mc_update(MotorController* mc) {
 
 void set_motor_vals(Motor_t* mt) {
     if (mt->en_uns > EN_MAX_ZONE || mt->en_uns < -EN_MAX_ZONE) {
-        mt->en_a = 0xFFFF;
-        mt->en_b = 0xFFFF;
+        mt->en_a = EN_MAX_ZONE;
+        mt->en_b = EN_MAX_ZONE;
         return;
     }
     if (mt->en_uns > EN_DEAD_ZONE) {
@@ -50,7 +50,6 @@ void mc_reply(MotorController* mc) {
     if (mc->state.bits.req_all) {
         mc->state.bits.req_all = 0;
         can_transmit_sta(mc);
-        // can_transmit_ina(&pc->inaSol);
         return;
     }
 
@@ -58,8 +57,4 @@ void mc_reply(MotorController* mc) {
         mc->state.bits.req_stat = 0;
         can_transmit_sta(mc);
     }
-    // if (mc->state.bits.req_ina) {
-    //     mc->state.bits.req_ina = 0;
-    //     can_transmit_ina(&mc->inaSol);
-    // }
 }
