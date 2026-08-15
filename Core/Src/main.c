@@ -437,6 +437,7 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef* hcan) {
         case CMD_VEL:
             mc.motor_l.en_uns = (int16_t) (((uint16_t) RxData[1] << 8) | RxData[0]);
             mc.motor_r.en_uns = (int16_t) (((uint16_t) RxData[3] << 8) | RxData[2]);
+            mc.cmd_vel_timeout = 0;
             break;
     }
 }

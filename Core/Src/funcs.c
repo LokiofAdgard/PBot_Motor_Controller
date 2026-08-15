@@ -1,6 +1,8 @@
 #include "canbus.h"
 #include "structs.h"
 
+extern MotorController mc;
+
 void mc_init(MotorController* mc, TIM_HandleTypeDef* tim, I2C_HandleTypeDef* hi2c) {
     mc->tim = tim;
 
@@ -10,6 +12,8 @@ void mc_init(MotorController* mc, TIM_HandleTypeDef* tim, I2C_HandleTypeDef* hi2
     __HAL_TIM_SET_COMPARE(tim, TIM_CHANNEL_4, 0);
 
     TMP102_init(&mc->tmp, hi2c, TMP_ADDR);
+
+    mc->cmd_vel_timeout = 0;
 }
 
 void mc_update(MotorController* mc) {
@@ -17,6 +21,14 @@ void mc_update(MotorController* mc) {
 }
 
 void set_motor_vals(Motor_t* mt) {
+    if (mc.cmd_vel_timeout >= CMD_VEL_TIMEOUT + 10)
+        return;
+    if (mc.cmd_vel_timeout++ >= CMD_VEL_TIMEOUT) {
+        mt->en_a = 0;
+        mt->en_b = 0;
+        return;
+    }
+
     if (mt->en_uns > EN_MAX_ZONE || mt->en_uns < -EN_MAX_ZONE) {
         mt->en_a = EN_MAX_ZONE;
         mt->en_b = EN_MAX_ZONE;

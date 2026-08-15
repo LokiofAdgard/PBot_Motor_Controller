@@ -6,8 +6,9 @@
 #include "TMP102.h"
 #include "stm32f1xx_hal_tim.h"
 
-#define EN_DEAD_ZONE 10
-#define EN_MAX_ZONE  400
+#define EN_DEAD_ZONE    10
+#define EN_MAX_ZONE     400
+#define CMD_VEL_TIMEOUT 100
 
 #define TMP_ADDR (0x48 << 1)
 
@@ -36,6 +37,8 @@ typedef struct MotorController {
 
     Motor_t motor_r;
     Motor_t motor_l;
+
+    uint8_t cmd_vel_timeout;
 
     TMP102_t tmp;
 } MotorController;
